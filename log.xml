@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites duration="50.5">
+<testsuites duration="50.7">
     <testsuite failures="0" name="Untitled suite in /Users/niko/Sites/casperjs/tests/suites/casper/agent.js" package="tests/suites/casper/agent" tests="3" time="0.256">
         <testcase classname="tests/suites/casper/agent" name="Default user agent matches /CasperJS/" time="0.103"/>
         <testcase classname="tests/suites/casper/agent" name="Default user agent matches /plop/" time="0.146"/>
@@ -818,7 +818,7 @@
         <testcase classname="tests/suites/xunit" name="Found an element matching: testsuite[name=&quot;foo&quot;][package=&quot;foo&quot;][tests=&quot;1&quot;][failures=&quot;1&quot;] testcase[name=&quot;footext&quot;] failure[type=&quot;footype&quot;]" time="0.005"/>
     </testsuite>
 </testsuites><?xml version="1.0" encoding="UTF-8"?>
-<testsuites duration="50.5">
+<testsuites duration="50.7">
     <testsuite failures="0" name="Untitled suite in /Users/niko/Sites/casperjs/tests/suites/casper/agent.js" package="tests/suites/casper/agent" tests="3" time="0.256">
         <testcase classname="tests/suites/casper/agent" name="Default user agent matches /CasperJS/" time="0.103"/>
         <testcase classname="tests/suites/casper/agent" name="Default user agent matches /plop/" time="0.146"/>

@@ -1,0 +1,64 @@
+name: Pre-receive checks
+on: [push]
+#kajsfhkjsdhgfvjcbxdv
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+
+      - name: Install yaml-lint and Puppet gems
+        run: |
+          gem install yaml-lint puppet --no-document
+
+      - name: Validate branch name and files
+        run: |
+          # Function to validate YAML file syntax
+          validate_yaml() {
+            local file="$1"
+            if ! yamlint "$file" &>/dev/null; then
+              echo "Invalid YAML syntax in file: $file"
+              exit 1
+            fi
+          }
+
+          # Function to validate Puppet file syntax
+          validate_puppet() {
+            local file="$1"
+            if ! puppet parser validate "$file" &>/dev/null; then
+              echo "Invalid Puppet syntax in file: $file"
+              exit 1
+            fi
+          }
+
+          # Read from standard input, which provides information about the incoming commits
+          while read oldrev newrev refname; do
+            # Extract the branch name from the refname
+            branch=$(basename "$refname")
+
+            # Validate the branch name using regular expressions
+            if [[ ! "$branch" =~ ^[a-zA-Z0-9_]+$ ]]; then
+              echo "Invalid branch name: $branch"
+              exit 1
+            fi
+
+            # Loop through the changed files in the incoming commit
+            for file in $(git diff-tree --no-commit-id --name-only -r "$newrev"); do
+              # Validate YAML files
+              if [[ "$file" =~ \.ya?ml$ ]]; then
+                validate_yaml "$file"
+              fi
+
+              # Validate Puppet files
+              if [[ "$file" =~ \.pp$ ]]; then
+                validate_puppet "$file"
+              fi
+            done
+          done < /dev/stdin

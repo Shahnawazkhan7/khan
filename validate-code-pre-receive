@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Function to validate YAML file syntax
+validate_yaml() {
+    local yaml_file="$1"
+    # Add your YAML validation command here
+    yamllint "$yaml_file"
+}
+
+# Function to validate Puppet file syntax
+validate_puppet() {
+    local puppet_file="$1"
+    # Add your Puppet validation command here
+    puppet parser validate "$puppet_file"
+}
+
+# Function to validate Git branch name syntax
+#validate_branch_name() {
+ #   local branch_name="$1"
+  #  # Check if the branch name contains only letters, numbers, and underscores
+   # if [[ ! "$branch_name" =~ ^[A-Za-z0-9_]+$ ]]; then
+    #    echo "Invalid branch name: $branch_name"
+     #   exit 1
+    #fi
+#}
+
+# Function to validate Git branch name syntax
+validate_branch_name() {
+    local branch_name="$1"
+    # Check if the branch name contains only letters and underscores
+    if [[ "$branch_name" =~ [^A-Za-z_] ]]; then
+        echo "Invalid branch name: $branch_name"
+        exit 1
+    fi
+}
+
+
+# Loop through the list of pushed commits
+while read old_commit new_commit refname; do
+    # Get the list of files changed in the commit
+    changed_files=$(git diff-tree --no-commit-id --name-only -r "$new_commit")
+
+    # Loop through the changed files
+    while IFS= read -r file; do
+        # Check if the file has a .yaml or .yml extension
+        if [[ "$file" =~ \.ya?ml$ ]]; then
+            # Validate the YAML file syntax
+            validate_yaml "$file"
+        fi
+
+        # Check if the file has a .pp extension (Puppet manifest)
+        if [[ "$file" =~ \.pp$ ]]; then
+            # Validate the Puppet file syntax
+            validate_puppet "$file"
+        fi
+    done <<< "$changed_files"
+
+    # Get the branch name from the refname
+    branch_name=$(basename "$refname")
+
+    # Validate the Git branch name syntax
+    validate_branch_name "$branch_name"
+done  # <-- Add this line to close the loop
+

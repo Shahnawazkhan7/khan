@@ -1,0 +1,48 @@
+#!/bin/bash
+
+validate_branch_name() {
+    branch_name="$1"
+    regex="^(master|develop|[A-Za-z]+[-_][A-Za-z0-9]+)$"
+
+    if [[ ! "$branch_name" =~ $regex ]]; then
+        echo "Invalid branch name: $branch_name"
+        exit 1
+    fi
+}
+
+validate_yaml_file() {
+    file_path="$1"
+
+    if ! command -v yamllint > /dev/null; then
+        echo "yamllint command not found. Please make sure it is installed."
+        exit 1
+    fi
+
+    if ! yamllint "$file_path"; then
+        echo "Invalid YAML file: $file_path"
+        exit 1
+    fi
+}
+
+# Iterate over the received references
+while read oldref newref refname; do
+    # Only perform checks for new references (branches, tags)
+    if [[ "$oldref" == "0000000000000000000000000000000000000000" ]]; then
+        # Extract the branch name from the refname
+        branch_name=$(basename "$refname")
+
+        # Validate the branch name
+        validate_branch_name "$branch_name"
+
+        # Iterate over the changed files in the new reference
+        git diff-tree --no-commit-id --name-only -r "$newref" | while read -r file; do
+            # Validate the YAML files
+            if [[ "$file" == *.yaml || "$file" == *.yml ]]; then
+                validate_yaml_file "$file"
+            fi
+        done
+    fi
+done
+
+exit 0
+
